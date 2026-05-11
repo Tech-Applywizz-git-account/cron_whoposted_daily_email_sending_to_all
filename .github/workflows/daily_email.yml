@@ -31,4 +31,4 @@ jobs:
           MS_TENANT_ID: ${{ secrets.MS_TENANT_ID }}
           MS_CLIENT_SECRET: ${{ secrets.MS_CLIENT_SECRET }}
           MS_SENDER_EMAIL: ${{ secrets.MS_SENDER_EMAIL }}
-        run: node -e "require('./index').processDailyEmails()"
+        run: node -e "require('./index').processDailyEmails().then(() => process.exit(0)).catch(err => { console.error(err); process.exit(1); })"
