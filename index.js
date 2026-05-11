@@ -5,12 +5,12 @@ const { DateTime } = require("luxon");
 require("dotenv").config();
 
 // Dummy Table Names for Testing
-// const USERS_TABLE = "whopost_users_dummy";
-// const TRANSACTIONS_TABLE = "whoposted_transactions_dummy";
+const USERS_TABLE = "whopost_users_dummy";
+const TRANSACTIONS_TABLE = "whoposted_transactions_dummy";
 
-// Production Table Names
-const USERS_TABLE = "whopost_users";
-const TRANSACTIONS_TABLE = "whoposted_transactions";
+// // Production Table Names
+// const USERS_TABLE = "whopost_users";
+// const TRANSACTIONS_TABLE = "whoposted_transactions";
 const JOBS_TABLE = "daily_linkedin_jobs_report";
 
 // Verify Environment Variables
