@@ -22,8 +22,11 @@ if (missingEnv.length > 0) {
     process.exit(1);
 }
 
-// Initialize Supabase Client
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+// Initialize Supabase Client from here
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { persistSession: false },
+    realtime: { enabled: false }
+});
 
 async function processDailyEmails() {
     const istTime = DateTime.now().setZone('Asia/Kolkata').toFormat('yyyy-MM-dd HH:mm:ss');
