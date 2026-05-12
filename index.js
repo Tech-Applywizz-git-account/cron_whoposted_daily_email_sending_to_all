@@ -79,8 +79,8 @@ async function processDailyEmails() {
 
             // Determine user type for tracking
             let userType = "free";
-            if (latestExpiry && latestExpiry > now) userType = "premium";
-            else if (latestExpiry) userType = "non-renewal";
+            if (latestExpiry && latestExpiry > now) userType = "active";
+            else if (latestExpiry) userType = "expired";
 
             try {
                 // 1. Create a tracking record first
@@ -101,7 +101,7 @@ async function processDailyEmails() {
                     console.log(`[Processing] Sending UPSELL email to: ${userEmail}`);
                     await sendUpsellEmail(userEmail, clientName, jobsToInclude, trackingId);
                 } 
-                else if (userType === "premium") {
+                else if (userType === "active") {
                     console.log(`[Processing] Sending ACTIVE email to: ${userEmail}`);
                     await sendActiveUpdateEmail(userEmail, clientName, jobsToInclude, trackingId);
                 } 
