@@ -77,21 +77,40 @@ async function processDailyEmails() {
             const latestExpiry = userExpiries.get(userEmail);
             const now = new Date();
 
+            // Determine user type for tracking
+            let userType = "free";
+            if (latestExpiry && latestExpiry > now) userType = "premium";
+            else if (latestExpiry) userType = "non-renewal";
+
             try {
-                if (!latestExpiry) {
+                // 1. Create a tracking record first
+                const { data: trackRecord, error: trackError } = await supabase
+                    .from("email_tracking")
+                    .insert({
+                        user_email: userEmail,
+                        user_type: userType
+                    })
+                    .select("id")
+                    .single();
+
+                if (trackError) throw new Error(`Tracking Insert Error: ${trackError.message}`);
+                const trackingId = trackRecord.id;
+
+                // 2. Send the specific email with trackingId
+                if (userType === "free") {
                     console.log(`[Processing] Sending UPSELL email to: ${userEmail}`);
-                    await sendUpsellEmail(userEmail, clientName, jobsToInclude);
-                }
-                else if (latestExpiry > now) {
+                    await sendUpsellEmail(userEmail, clientName, jobsToInclude, trackingId);
+                } 
+                else if (userType === "premium") {
                     console.log(`[Processing] Sending ACTIVE email to: ${userEmail}`);
-                    await sendActiveUpdateEmail(userEmail, clientName, jobsToInclude);
-                }
+                    await sendActiveUpdateEmail(userEmail, clientName, jobsToInclude, trackingId);
+                } 
                 else {
                     console.log(`[Processing] Sending RENEWAL email to: ${userEmail}`);
-                    await sendRenewalEmail(userEmail, clientName, jobsToInclude);
+                    await sendRenewalEmail(userEmail, clientName, jobsToInclude, trackingId);
                 }
-
-                // Rate limiting: 2 seconds between emails (30/min)
+                
+                // Rate limiting
                 await sleep(2000);
             } catch (mailErr) {
                 console.error(`Failed to process email for ${userEmail}:`, mailErr.message);

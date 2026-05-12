@@ -53,6 +53,14 @@ function generateJobsHtml(jobs, isBlurry = false) {
     `;
 }
 
+// Helper to add the invisible tracking pixel
+function getTrackingPixelHtml(trackingId) {
+    if (!trackingId) return '';
+    // Replace this with your actual production domain
+    const baseUrl = process.env.TRACKING_BASE_URL || "https://www.whopostedai.com/api/track-email";
+    return `<img src="${baseUrl}?id=${trackingId}" width="1" height="1" style="display:none !important;" />`;
+}
+
 async function sendMail(to, subject, htmlContent) {
     const accessToken = await getMicrosoftAccessToken();
     const senderEmail = process.env.MS_SENDER_EMAIL || "krish@whopostedai.com";
@@ -95,7 +103,7 @@ const footerHtml = `
 `;
 
 // 1. ACTIVE USERS EMAIL
-async function sendActiveUpdateEmail(to, clientName, jobs = []) {
+async function sendActiveUpdateEmail(to, clientName, jobs = [], trackingId = null) {
     const htmlContent = `
         <div style="${baseStyle}">
             ${headerHtml}
@@ -103,18 +111,21 @@ async function sendActiveUpdateEmail(to, clientName, jobs = []) {
             <p style="font-size: 16px; line-height: 1.6;">Hi ${clientName},</p>
             <p style="font-size: 16px; line-height: 1.6;">New job postings and hiring connections have been added to your WhoPosted dashboard.</p>
             <p style="font-size: 16px; line-height: 1.6;">These are professionals actively hiring — giving you a chance to connect early and stand out before others apply.</p>
-            <p style="font-size: 16px; line-height: 1.6;">We've found 3 recruiters that look like a great fit for you today:</p>            ${generateJobsHtml(jobs)}
+            <p style="font-size: 16px; line-height: 1.6;">We've found 3 recruiters that look like a great fit for you today:</p>            
+            ${generateJobsHtml(jobs)}
             <p style="font-size: 16px; line-height: 1.6; font-weight: 600;">Take a few minutes today to reach out and build meaningful connections.</p>
             <div style="background: #533afd; padding: 24px; border-radius: 16px; text-align: center; margin: 32px 0;">
                 <a href="https://www.whopostedai.com" style="display: inline-block; padding: 16px 32px; background: #ffffff; color: #533afd !important; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 14px; text-transform: uppercase;">Go to Dashboard</a>
             </div>
             ${footerHtml}
+            ${getTrackingPixelHtml(trackingId)}
         </div>
     `;
-    await sendMail(to, "You've got new job posted members", htmlContent);}
+    await sendMail(to, "You've got new job posted members", htmlContent);
+}
 
 // 2. EXPIRED USERS EMAIL
-async function sendRenewalEmail(to, clientName, jobs = []) {
+async function sendRenewalEmail(to, clientName, jobs = [], trackingId = null) {
     const htmlContent = `
         <div style="${baseStyle}">
             ${headerHtml}
@@ -129,12 +140,14 @@ async function sendRenewalEmail(to, clientName, jobs = []) {
                 <a href="https://www.whopostedai.com/billing" style="display: inline-block; padding: 16px 32px; background: #533afd; color: #ffffff !important; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 14px; text-transform: uppercase;">Renew Access Now</a>
             </div>
             ${footerHtml}
+            ${getTrackingPixelHtml(trackingId)}
         </div>
     `;
-    await sendMail(to, "Don't miss out! Your Whoposted subscription has ended", htmlContent);}
+    await sendMail(to, "Don't miss out! Your Whoposted subscription has ended", htmlContent);
+}
 
 // 3. FREE USERS EMAIL
-async function sendUpsellEmail(to, clientName, jobs = []) {
+async function sendUpsellEmail(to, clientName, jobs = [], trackingId = null) {
     const htmlContent = `
         <div style="${baseStyle}">
             ${headerHtml}
@@ -149,6 +162,7 @@ async function sendUpsellEmail(to, clientName, jobs = []) {
                 <a href="https://www.whopostedai.com/pricing" style="display: inline-block; padding: 16px 32px; background: #ffffff; color: #533afd !important; text-decoration: none; border-radius: 12px; font-weight: 800; font-size: 14px; text-transform: uppercase;">Upgrade to Unlock</a>
             </div>
             ${footerHtml}
+            ${getTrackingPixelHtml(trackingId)}
         </div>
     `;
     await sendMail(to, "Connect Directly with Hiring Managers", htmlContent);
